@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class FoodTags extends Model
 {
+    public $timestamps = false;
     use HasFactory;
 }

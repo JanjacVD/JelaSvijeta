@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 /**
@@ -16,13 +17,13 @@ class MealFactory extends Factory
      */
     public function definition()
     {
-        $random = Str::random(5);
+        $category = Category::all()->pluck('id')->random();
         return [
-            'slug' => 'naslov-kategorije-'.$random.'',
+            'slug' => $this->faker->slug(9),
             'created_at' => now(),
             'updated_at' => now(),
             'deleted_at' => null,
-            'category_id' => 1
+            'category_id' => $category,
         ];
     }
 }

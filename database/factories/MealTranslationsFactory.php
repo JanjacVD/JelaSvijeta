@@ -4,10 +4,12 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\DB;
+use App\Models\Lang;
+use App\Models\Meal;
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Ingredient>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\MealTranslations>
  */
-class IngredientFactory extends Factory
+class MealTranslationsFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -16,10 +18,6 @@ class IngredientFactory extends Factory
      */
     public function definition()
     {
-        return [
-                'slug' => $this->faker->slug(9),
-                'created_at' => now(),
-                'updated_at' => now()
-        ];
+        
     }
 }

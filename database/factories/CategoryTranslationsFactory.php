@@ -2,12 +2,15 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
+use App\Models\Lang;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\DB;
+
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Ingredient>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
  */
-class IngredientFactory extends Factory
+class CategoryTranslationsFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -16,10 +19,6 @@ class IngredientFactory extends Factory
      */
     public function definition()
     {
-        return [
-                'slug' => $this->faker->slug(9),
-                'created_at' => now(),
-                'updated_at' => now()
-        ];
+        
     }
 }

@@ -10,6 +10,7 @@ class Meal extends Model
 {
     use HasFactory, SoftDeletes;
 
+
     public function hasCategory()
     {
         return $this->belongsTo(Category::class);

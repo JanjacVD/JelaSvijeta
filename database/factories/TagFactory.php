@@ -18,11 +18,9 @@ class TagFactory extends Factory
     {
         $random = Str::random(5);
         return [
-            'title_hr' => 'Naslov oznake na hrvatskom-'.$random.'',
-            'title_en' => 'Tag title in english-'.$random.'',
-            'slug' => 'naslov-oznake-'.$random.'',
+            'slug' => $this->faker->slug(9),
             'created_at' => now(),
-            'update_at' => now()
+            'updated_at' => now()
         ];
     }
 }

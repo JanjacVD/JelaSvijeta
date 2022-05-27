@@ -2,8 +2,21 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
+use App\Models\CategoryTranslations;
+use App\Models\FoodTags;
+use App\Models\Ingredient;
+use App\Models\IngredientTranslations;
+use App\Models\Lang;
+use App\Models\Meal;
+use App\Models\MealTranslations;
+use App\Models\Tag;
+use App\Models\TagTranslations;
+use Database\Factories\MealIngMatcherFactory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Faker\Factory as Faker;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,11 +27,61 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-         \App\Models\Meal::factory(5)->create();
+        $faker = Faker::create();
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        Category::factory()->count(3)->create();
+        Meal::factory()->count(5)->create();
+        Lang::factory()->count(3)->create();
+        Ingredient::factory()->count(5)->create();
+        Tag::factory()->count(5)->create();
+
+        $lang = Lang::all()->pluck('id');
+        $tag = Tag::all()->pluck('id');
+
+        foreach ($tag as $tagID) {
+            foreach ($lang as $langID) {
+                TagTranslations::create([
+                    'lang_id' => $langID,
+                    'tag_id' => $tagID,
+                    'translation' => $faker->word,
+                ]);
+            }
+
+            $meal = Meal::all()->pluck('id');
+            foreach ($meal as $mealID) {
+                foreach ($lang as $langID) {
+                    DB::table('meal_translations')->insert([
+                        'lang_id' => $langID,
+                        'meal_id' => $mealID,
+                        'title' => $faker->word,
+                        'description' => $faker->sentence(10),
+                    ]);
+                }
+            }
+
+            $ingredient = Ingredient::all()->pluck('id');
+            foreach ($ingredient as $ingredientID) {
+                foreach ($lang as $langID) {
+                    DB::table('ingredient_translations')->insert([
+                        'lang_id' => $langID,
+                        'ingredient_id' => $ingredientID,
+                        'translation' => $faker->word,
+                    ]);
+                }
+            }
+
+            $category = Category::all()->pluck('id');
+            foreach ($category as $categoryID) {
+                foreach ($lang as $langID) {
+                    DB::table('category_translations')->insert([
+                        'lang_id' => $langID,
+                        'category_id' => $categoryID,
+                        'translation' => $faker->word,
+                    ]);
+                }
+            }
+            
+            //To seed meal-tag and ingredient-tag relations, run TagSeeder and IngredientSeeder 
+        }
     }
 }

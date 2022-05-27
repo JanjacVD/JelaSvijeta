@@ -16,9 +16,6 @@ return new class extends Migration
         Schema::create('ingredients', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-
-            $table->string('title_hr');
-            $table->string('title_en');
             $table->string('slug')->unique();
         });
     }
