@@ -29,10 +29,10 @@ class DatabaseSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        Category::factory()->count(3)->create();
-        Meal::factory()->count(5)->create();
-        Lang::factory()->count(3)->create();
-        Ingredient::factory()->count(5)->create();
+        Category::factory()->count(5)->create();
+        Meal::factory()->count(30)->create();
+        Lang::factory()->count(5)->create();
+        Ingredient::factory()->count(10)->create();
         Tag::factory()->count(5)->create();
 
         $lang = Lang::all()->pluck('id');
@@ -46,6 +46,7 @@ class DatabaseSeeder extends Seeder
                     'translation' => $faker->word,
                 ]);
             }
+        }
 
             $meal = Meal::all()->pluck('id');
             foreach ($meal as $mealID) {
@@ -80,8 +81,9 @@ class DatabaseSeeder extends Seeder
                     ]);
                 }
             }
-            
-            //To seed meal-tag and ingredient-tag relations, run TagSeeder and IngredientSeeder 
-        }
+        $this->call(TagSeeder::class);
+        $this->call(IngredientSeeder::class);
+        //To relate more ingredients to a meal run command: php artisan db:seed --class IngredientSeeder
+        //To relate more tags to a meal run command: php artisan db:seed --class TagSeeder 
     }
 }

@@ -7,10 +7,10 @@ use Illuminate\Support\Carbon;
 use App\Models\Meal;
 use App\Models\Tag;
 use App\Models\Category;
+use App\Models\Filter\Filter;
+use App\Models\Filter\ObjectCreator;
 use App\Models\Ingredient;
 use App\Models\Lang;
-
-use function PHPUnit\Framework\isEmpty;
 
 class RequestController extends Controller
 {
@@ -23,48 +23,24 @@ class RequestController extends Controller
             'tags.*' => 'integer',
             'with' => 'array',
             'with.*' => 'string',
-            'lang' => 'required|string',
             'diff_time' => 'numeric',
         ]);
-        $with = $request->with;
-        $category = $request->category;
-        $tags = $request->tags;
+        //Check if Lang exists and get it if it does
+        $rpp = $request->per_page; //Results per page
+        $page = $request->page; //Page number
         $lang = Lang::where('lang', $request->lang)->firstOrFail();
-        $meals = $lang->hasMeals;
-        $allMeals = Meal::all();
-        if($with != null){
-            if(in_array('tags', $with)){
-                $returnedTags = Tag::all();
-            }
-            if(in_array('category', $with)){
-                $returnedCategory = $category;
-            }
-            if(in_array('ingredients', $with)){
-                $returnedIngredients = Ingredient::all();
-            }
+        //Filter all the meals and create objects in the filter class
+        $meals = new Filter();
+        $response = $meals->filter($request->tags, $request->category, $request->with, $lang->id);
+        //Paginate the response if needed
+        if($rpp != null && $page !=null){
+            $total = count($response); //Total avaliable items
+            $totalPages = ceil($total / $rpp);
+            $page = max($page, 1); //get 1 page when $page <=0
+            $page = min($page, $totalPages); //get last page when $page > $totalPages
+            $offset = ($page - 1) * $rpp;
+            $response = array_slice($response, $offset, $rpp);
         }
-        if($category != 0){
-            $category = Category::findOrFail($category);
-            $filteredByCategory = $meals->where('category_id', $category->id);
-        }
-        else{
-            $filteredByCategory = $meals;
-        }
-        if($tags != null){
-            foreach($filteredByCategory as $meal){
-            $meals=$meal->hasTags->pluck('pivot');
-            $filteredByTags = $meals->whereIn('tag_id', $tags);
-            foreach($filteredByTags as $filtered)
-            {
-                print($filtered->meal_id);
-                $returnedMeals = Meal::all()->whereIn('id', $filtered->meal_id);
-                foreach($returnedMeals as $a){
-                }
-            }
-        }
-    }
-        else{
-            $filteredByTags = $filteredByCategory;
-        }
+            return $response;
     }
 }
