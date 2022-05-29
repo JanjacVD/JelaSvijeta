@@ -17,9 +17,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/meals', [RequestController::class, 'fetchRequest']);
+Route::get('/meals', [RequestController::class, 'fetchRequest'])->name('api.meals');
 Route::get('/', function(){
     $langs = Lang::all()->pluck('lang');
     return 'Please select one of avaliable languages from the array: '.$langs.' then proceed to the route "/meals?lang=[lang_from_the_array]"';
-});
+})->name('api.home');
 
