@@ -32,7 +32,7 @@ class ObjectCreator
         if ($food->created_at == $food->updated_at && $food->deleted_at == null) {
             $status = "Created";
         } elseif ($food->created_at != $food->updated_at && $food->deleted_at == null) {
-            $status = "Updated";
+            $status = "Modified";
         } elseif ($food->deleted_at != null) {
             $status = "Deleted";
         }
