@@ -17,11 +17,16 @@ use function PHPUnit\Framework\isEmpty;
 class ObjectCreator
 {
 
-    public function make($meal, $with, $lang)
+    public function make($meal, $with, $lang, $trashed, $timestamp)
     {
         $finalArray = [];
 
-        $food = Meal::where('id', $meal)->first();
+        if($trashed == true){
+            $food = Meal::withTrashed()->where('deleted_at', '>', $timestamp)->orWhere('deleted_at', null)->where('id', $meal)->first();
+        }
+        else{
+            $food = Meal::where('id', $meal)->first();
+        }
         $foodTranslation = MealTranslations::where('lang_id', $lang)->where('meal_id', $meal)->first();
 
         if ($food->created_at == $food->updated_at && $food->deleted_at == null) {
@@ -29,7 +34,7 @@ class ObjectCreator
         } elseif ($food->created_at != $food->updated_at && $food->deleted_at == null) {
             $status = "Updated";
         } elseif ($food->deleted_at != null) {
-            $status = "Updated";
+            $status = "Deleted";
         }
         if ($with != null) {
             $withArray = [];

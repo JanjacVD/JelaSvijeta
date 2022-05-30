@@ -14,6 +14,7 @@ use App\Models\Lang;
 
 class RequestController extends Controller
 {
+
     public function fetchRequest(Request $request)
     {
         $request->validate([
@@ -26,12 +27,17 @@ class RequestController extends Controller
             'diff_time' => 'numeric',
         ]);
         //Check if Lang exists and get it if it does
+        $trashed = false;
+        if($request->diff_time != null){
+            $trashed = true;
+            $timestamp = Carbon::createFromTimestamp($request->diff_time)->format('Y-m-d H:i:s');
+        }
         $rpp = $request->per_page; //Results per page
         $page = $request->page; //Page number
         $lang = Lang::where('lang', $request->lang)->firstOrFail();
         //Filter all the meals and create objects in the filter class
         $meals = new Filter();
-        $response = $meals->filter($request->tags, $request->category, $request->with, $lang->id);
+        $response = $meals->filter($request->tags, $request->category, $request->with, $lang->id, $trashed, $timestamp);
         //Paginate the response if needed
         if($rpp != null && $page !=null){
             $total = count($response); //Total avaliable items
