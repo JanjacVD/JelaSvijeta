@@ -60,21 +60,24 @@ class RequestController extends Controller
             } else {
                 $totalPages = $total / $rpp;
             }
-            $meta = ['currentPage' => $request->page, 'totalItems' => $total, 'itemsPerPage' => $rpp, 'totalPages' => $totalPages];
-            if(isset($request->page)){
-                if($request->page >= $totalPages){
+            if (isset($request->page)) {
+                $currentPage = $request->page;
+                if ($request->page >= $totalPages) {
                     $nextUrl = null;
+                } else {
+                    $nextUrl = str_replace('page=' . $request->page, 'page=' . ($request->page + 1), $currentUrl);
                 }
-                else{
-                    $nextUrl = str_replace('page='.$request->page,'page='.($request->page + 1), $currentUrl);
-                }
-                if($request->page > 1){
-                    $prevUrl = str_replace('page='.$request->page,'page='.($request->page - 1), $currentUrl);
-                }
-                else{
+                if ($request->page > 1) {
+                    $prevUrl = str_replace('page=' . $request->page, 'page=' . ($request->page - 1), $currentUrl);
+                } else {
                     $prevUrl = null;
                 }
+            } else {
+                $currentPage = 1;
+                $prevUrl = null;
+                $nextUrl = $currentUrl.'&page=2';
             }
+            $meta = ['currentPage' => $currentPage, 'totalItems' => $total, 'itemsPerPage' => $rpp, 'totalPages' => $totalPages];
             $links = ['prev' => $prevUrl, 'next' => $nextUrl, 'self' => $currentUrl];
         } else {
             $meta = ['totalItems' => $total];
