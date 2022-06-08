@@ -31,9 +31,21 @@ class DatabaseSeeder extends Seeder
 
         Category::factory()->count(5)->create();
         Meal::factory()->count(30)->create();
-        Lang::factory()->count(5)->create();
         Ingredient::factory()->count(10)->create();
         Tag::factory()->count(5)->create();
+
+
+//The seeder will break if the seeder is called twice due to lang being unique, keep that in mind, this is only for the purpose of making things easier, otherwise, use Lang::factory();
+        DB::table('langs')->insert([
+            'lang' => 'hr',
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+        DB::table('langs')->insert([
+            'lang' => 'en',
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
 
         $lang = Lang::all()->pluck('id');
         $tag = Tag::all()->pluck('id');
@@ -81,8 +93,12 @@ class DatabaseSeeder extends Seeder
                     ]);
                 }
             }
+
+         
         $this->call(TagSeeder::class);
         $this->call(IngredientSeeder::class);
+
+
         //To relate more ingredients to a meal run command: php artisan db:seed --class IngredientSeeder
         //To relate more tags to a meal run command: php artisan db:seed --class TagSeeder 
     }

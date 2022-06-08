@@ -21,32 +21,69 @@ class RequestController extends Controller
             'per_page' => 'integer',
             'page' => 'integer',
             'category' => 'integer',
-            'tags.*' => 'integer',
-            'with' => 'array',
-            'with.*' => 'string',
+            'tags' => 'string',
+            'with' => 'string',
             'diff_time' => 'numeric',
         ]);
+        $currentUrl = url()->full();
+
+        $with = null;
+        $tags = null;
+        $rpp = $request->per_page;
+        if ($request->tags != null) {
+            $tags = explode(",", $request->tags);
+        }
+        if ($request->with != null) {
+            $with = explode(",", $request->with);
+        }
         //Check if Lang exists and get it if it does
+        $timestamp = $request->diff_time;
         $trashed = false;
-        if($request->diff_time != null){
+        if ($timestamp != null) {
             $trashed = true;
             $timestamp = Carbon::createFromTimestamp($request->diff_time)->format('Y-m-d H:i:s');
         }
         $rpp = $request->per_page; //Results per page
-        $page = $request->page; //Page number
         $lang = Lang::where('lang', $request->lang)->firstOrFail();
         //Filter all the meals and create objects in the filter class
         $meals = new Filter();
-        $response = $meals->filter($request->tags, $request->category, $request->with, $lang->id, $trashed, $timestamp);
-        //Paginate the response if needed
-        if($rpp != null && $page !=null){
-            $total = count($response); //Total avaliable items
-            $totalPages = ceil($total / $rpp);
-            $page = max($page, 1); //get 1 page when $page <=0
-            $page = min($page, $totalPages); //get last page when $page > $totalPages
-            $offset = ($page - 1) * $rpp;
-            $response = array_slice($response, $offset, $rpp);
+        $response = $meals->filter($tags, $request->category, $with, $lang->id, $trashed, $timestamp, $rpp);
+        if (isset($timestamp)) {
+            $total = Meal::withTrashed()->where('deleted_at', '>', $timestamp)->orWhere('deleted_at', null)->count();
+        } else {
+            $total = Meal::all()->count();
         }
-            return $response;
+        if (isset($rpp)) {
+            $pagesResidue = $total % $rpp;
+            if ($pagesResidue > 0) {
+                $totalPages = round(($total / $rpp) + 1);
+            } else {
+                $totalPages = $total / $rpp;
+            }
+            $meta = ['currentPage' => $request->page, 'totalItems' => $total, 'itemsPerPage' => $rpp, 'totalPages' => $totalPages];
+            if(isset($request->page)){
+                if($request->page >= $totalPages){
+                    $nextUrl = null;
+                }
+                else{
+                    $nextUrl = str_replace('page='.$request->page,'page='.($request->page + 1), $currentUrl);
+                }
+                if($request->page > 1){
+                    $prevUrl = str_replace('page='.$request->page,'page='.($request->page - 1), $currentUrl);
+                }
+                else{
+                    $prevUrl = null;
+                }
+            }
+            $links = ['prev' => $prevUrl, 'next' => $nextUrl, 'self' => $currentUrl];
+        } else {
+            $meta = ['totalItems' => $total];
+            $links = ['self' => $currentUrl];
+        }
+        return response()->json([
+            'meta' => $meta,
+            'data' => $response,
+            'links' => $links
+        ]);
     }
 }

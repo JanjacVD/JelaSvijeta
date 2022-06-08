@@ -6,9 +6,11 @@ use App\Models\Category;
 use App\Models\CategoryTranslations;
 use App\Models\FoodIngredients;
 use App\Models\FoodTags;
+use App\Models\Ingredient;
 use App\Models\IngredientTranslations;
 use App\Models\Meal;
 use App\Models\MealTranslations;
+use App\Models\Tag;
 use App\Models\TagTranslations;
 use Illuminate\Support\Facades\DB;
 
@@ -52,30 +54,33 @@ class ObjectCreator
                 $tagsArray = [];
                 $relatedTags = FoodTags::where('meal_id', $food->id)->get();
                 foreach ($relatedTags as $tag) {
+                    $tagReal = Tag::where('id', $tag->tag_id)->first();
                     $tagTranslation = TagTranslations::where('lang_id', $lang)->where('tag_id', $tag->tag_id)->first();
-                    $tagI = $tag->id;
+                    $tagI = $tagReal->id;
                     $tagT = $tagTranslation->translation;
-                    $tagS = $tag->slug;
+                    $tagS = $tagReal->slug;
                     array_push($tagsArray, ['id' => $tagI, 'title' => $tagT, 'slug' => $tagS]);
-                    array_push($withArray, ['tags' => $tagsArray]);
                 }
+                array_push($withArray, ['tags' => $tagsArray]);
             }
             if (in_array('ingredients', $with)) {
                 $ingredientsArray = [];
                 $relatedIngredients = FoodIngredients::where('meal_id', $food->id)->get();
+
                 foreach ($relatedIngredients as $ingredient) {
+                    $ingredientReal = Ingredient::where('id', $ingredient->ingredient_id)->first();
                     $ingredientTranslation = IngredientTranslations::where('lang_id', $lang)->where('ingredient_id', $ingredient->ingredient_id)->first();
-                    $ingI = $ingredient->id;
+                    $ingI = $ingredientReal->id;
                     $ingT = $ingredientTranslation->translation;
-                    $ingS = $ingredient->slug;
+                    $ingS = $ingredientReal->slug;
                     array_push($ingredientsArray, ['id' => $ingI, 'title' => $ingT, 'slug' => $ingS]);
-                    array_push($withArray, ['ingredients' => $ingredientsArray]);
                 }
+                array_push($withArray, ['ingredients' => $ingredientsArray]);
             }
         }
+        $foodI = $food->id;
         $foodT = $foodTranslation->title;
         $foodD = $foodTranslation->description;
-        $foodI = $food->id;
         $foodS = $food->slug;
         array_push($finalArray, ['id' => $foodI, 'title' => $foodT, 'description' => $foodD, 'slug' => $foodS, 'status' => $status]);
         if (!empty($with)) {
