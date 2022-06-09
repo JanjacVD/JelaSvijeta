@@ -77,10 +77,10 @@ class RequestController extends Controller
                 $prevUrl = null;
                 $nextUrl = $currentUrl.'&page=2';
             }
-            $meta = ['currentPage' => $currentPage, 'totalItems' => $total, 'itemsPerPage' => $rpp, 'totalPages' => $totalPages];
+            $meta = ['currentPage' => $currentPage, 'totalItems' => $meals->totalCount, 'itemsPerPage' => $rpp, 'totalPages' => $totalPages];
             $links = ['prev' => $prevUrl, 'next' => $nextUrl, 'self' => $currentUrl];
         } else {
-            $meta = ['totalItems' => $total];
+            $meta = ['totalItems' => $meals->totalCount];
             $links = ['self' => $currentUrl];
         }
         return response()->json([
