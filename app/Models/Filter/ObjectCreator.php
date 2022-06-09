@@ -42,7 +42,6 @@ class ObjectCreator
         $returnable = ['id' => $foodI, 'title' => $foodT, 'description' => $foodD, 'slug' => $foodS, 'status' => $status];
 
         if ($with != null) {
-            $withArray = [];
             if (in_array('category', $with)) {
                 $categoryArray = [];
                 if ($food->category_id != null) {
