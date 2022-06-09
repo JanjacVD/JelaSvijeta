@@ -21,12 +21,9 @@ class ObjectCreator
 
     public function make($meal, $with, $lang, $trashed, $timestamp)
     {
-        $finalArray = [];
-
-        if($trashed == true){
+        if ($trashed == true) {
             $food = Meal::withTrashed()->where('deleted_at', '>', $timestamp)->orWhere('deleted_at', null)->where('id', $meal)->first();
-        }
-        else{
+        } else {
             $food = Meal::where('id', $meal)->first();
         }
         $foodTranslation = MealTranslations::where('lang_id', $lang)->where('meal_id', $meal)->first();
@@ -38,17 +35,28 @@ class ObjectCreator
         } elseif ($food->deleted_at != null) {
             $status = "Deleted";
         }
+        $foodI = $food->id;
+        $foodT = $foodTranslation->title;
+        $foodD = $foodTranslation->description;
+        $foodS = $food->slug;
+        $returnable = ['id' => $foodI, 'title' => $foodT, 'description' => $foodD, 'slug' => $foodS, 'status' => $status];
+
         if ($with != null) {
             $withArray = [];
             if (in_array('category', $with)) {
                 $categoryArray = [];
-                $category = Category::where('id', $food->category_id)->first();
-                $categoryTranslation = CategoryTranslations::where('lang_id', $lang)->where('category_id', $category->id)->first();
-                $catI = $category->id;
-                $catT = $categoryTranslation->translation;
-                $catS = $category->slug;
-                array_push($categoryArray, ['id' => $catI, 'title' => $catT, 'slug' => $catS]);
-                array_push($withArray, ['category' => $categoryArray]);
+                if ($food->category_id != null) {
+                    $category = Category::where('id', $food->category_id)->first();
+                    $categoryTranslation = CategoryTranslations::where('lang_id', $lang)->where('category_id', $category->id)->first();
+                    $catI = $category->id;
+                    $catT = $categoryTranslation->translation;
+                    $catS = $category->slug;
+                    array_push($categoryArray, ['id' => $catI, 'title' => $catT, 'slug' => $catS]);
+                    $returnable['category'] = $categoryArray;
+                }
+                else{
+                    $returnable['category'] = null;
+                }
             }
             if (in_array('tags', $with)) {
                 $tagsArray = [];
@@ -61,7 +69,7 @@ class ObjectCreator
                     $tagS = $tagReal->slug;
                     array_push($tagsArray, ['id' => $tagI, 'title' => $tagT, 'slug' => $tagS]);
                 }
-                array_push($withArray, ['tags' => $tagsArray]);
+                $returnable['tags'] = $tagsArray;
             }
             if (in_array('ingredients', $with)) {
                 $ingredientsArray = [];
@@ -75,17 +83,10 @@ class ObjectCreator
                     $ingS = $ingredientReal->slug;
                     array_push($ingredientsArray, ['id' => $ingI, 'title' => $ingT, 'slug' => $ingS]);
                 }
-                array_push($withArray, ['ingredients' => $ingredientsArray]);
+                $returnable['ingredients'] = $ingredientsArray;
             }
         }
-        $foodI = $food->id;
-        $foodT = $foodTranslation->title;
-        $foodD = $foodTranslation->description;
-        $foodS = $food->slug;
-        array_push($finalArray, ['id' => $foodI, 'title' => $foodT, 'description' => $foodD, 'slug' => $foodS, 'status' => $status]);
-        if (!empty($with)) {
-            array_push($finalArray, $withArray);
-        }
-        return $finalArray;
+
+        return $returnable;
     }
 }
